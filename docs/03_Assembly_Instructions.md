@@ -1,14 +1,22 @@
 # 03 -- Assembly Instructions
 
-Read `01_System_Overview.md` first if you haven't -- it explains *why* the
-rig is laid out this way, which makes these steps easier to follow (and
-easier to adapt if your parts differ slightly from the BOM).
+New to this kind of build? `00_Start_Here.md` has a beginner-friendly
+explanation of every tool below (what it looks like, how to use it, where
+to buy one) plus the full software install walkthrough -- read that first
+if any of this is unfamiliar.
+
+Otherwise, read `01_System_Overview.md` first if you haven't -- it explains
+*why* the rig is laid out this way, which makes these steps easier to
+follow (and easier to adapt if your parts differ slightly from the BOM).
 
 Tools you'll need: 2.5mm and 4mm hex (Allen) keys (usually included with
 V-slot hardware kits), a Phillips screwdriver, a drill (for the motor
 bracket and switch brackets), a hacksaw or angle grinder (to cut the
-aluminum bar stock for the motor mount, if it doesn't come pre-cut), a
-soldering iron (a few connections), wire strippers, and a multimeter.
+aluminum bar stock for the motor mount, if it doesn't come pre-cut), wire
+strippers, a small flathead screwdriver (for the screw-terminal
+connections), and a multimeter. **No soldering is required** -- every
+electrical connection in this build uses screw terminals; see
+`04_Wiring_Electrical.md`.
 
 ## Step 1 -- Lay out the rail
 

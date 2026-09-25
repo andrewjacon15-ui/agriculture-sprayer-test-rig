@@ -10,10 +10,19 @@ Arduino Uno controller, limit switches for end-of-travel detection
 (optional encoder for closed-loop speed accuracy). Total parts cost is
 roughly $455 against a $1,500 budget -- see the BOM for the breakdown.
 
+**New to this? Never assembled electronics or used an Arduino before?**
+Start with [`docs/00_Start_Here.md`](docs/00_Start_Here.md) -- it's a
+beginner-level walkthrough of every tool you need, how to install the
+(free) software, and the order to do everything in. Everyone else can skip
+straight to the overview below.
+
+![Rail layout: plan view of the 8 ft rail with the motor, belt-driven carriage, and limit switches, plus a control system block diagram](docs/images/rail_layout_drawing.png)
+
 ## Where to start
 
 | If you want to... | Read |
 |---|---|
+| **Start from zero (no experience assumed)** | [`docs/00_Start_Here.md`](docs/00_Start_Here.md) |
 | Understand *why* the rig is designed this way | [`docs/01_System_Overview.md`](docs/01_System_Overview.md) |
 | Order parts | [`docs/02_Bill_of_Materials.md`](docs/02_Bill_of_Materials.md) |
 | Build it | [`docs/03_Assembly_Instructions.md`](docs/03_Assembly_Instructions.md) |
@@ -28,8 +37,11 @@ roughly $455 against a $1,500 budget -- see the BOM for the breakdown.
 ## Repository layout
 
 ```
-docs/                              -- all project documentation (read in order 01-09)
+docs/                              -- all project documentation (read in order 00-09)
+  00_Start_Here.md                 -- beginner setup guide: tools, software install, glossary
   08_Component_Reference/          -- one page per hardware part: specs, pinout, how to test/replace it
+  images/                          -- static renders of the rig_drawing.html diagrams
+  rig_drawing.html                 -- the same diagrams, interactive/zoomable, open in any browser
 firmware/
   sprayer_carriage_control/
     sprayer_carriage_control.ino   -- the control logic (heavily commented)

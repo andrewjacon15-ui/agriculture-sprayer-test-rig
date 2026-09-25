@@ -8,6 +8,11 @@ be evaluated at realistic travel speeds without needing a full vehicle. It's
 a test tool, not a production machine -- the design favors low cost,
 off-the-shelf parts, and easy troubleshooting over precision or ruggedness.
 
+![Plan view of the rail layout and a control system block diagram](images/rail_layout_drawing.png)
+
+*A larger, zoomable version of this drawing is at `docs/rig_drawing.html`
+-- open it in any web browser, no software installation needed.*
+
 ## Requirements (as given)
 
 | Requirement | Value |

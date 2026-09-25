@@ -1,0 +1,420 @@
+<title>Rail Layout Drawing</title>
+<style>
+  :root {
+    --bg: #eef1f5;
+    --paper: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #6b7686;
+    --line-faint: #d7dce3;
+    --accel: #c97a2e;
+    --cruise: #2657d9;
+    --switch: #c1433a;
+    --rail-metal: #aeb6c2;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11151c;
+      --paper: #1a2029;
+      --ink: #e7ebf1;
+      --ink-soft: #9aa5b4;
+      --line-faint: #303947;
+      --accel: #e0993f;
+      --cruise: #6f96ff;
+      --switch: #ff7a6e;
+      --rail-metal: #5a6472;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151c;
+    --paper: #1a2029;
+    --ink: #e7ebf1;
+    --ink-soft: #9aa5b4;
+    --line-faint: #303947;
+    --accel: #e0993f;
+    --cruise: #6f96ff;
+    --switch: #ff7a6e;
+    --rail-metal: #5a6472;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, Segoe UI, sans-serif;
+    padding-inline: 20px;
+    padding-block: 28px;
+    display: flex;
+    justify-content: center;
+  }
+  .sheet {
+    width: 100%;
+    max-width: 1080px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  header.title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+  }
+  header.title h1 {
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  header.title .meta {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line-faint);
+    border-radius: 4px;
+    padding: 22px clamp(14px, 3vw, 28px) 18px;
+  }
+  .card h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 4px;
+  }
+  .card .sub {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+    max-width: 65ch;
+  }
+
+  figure { margin: 0; }
+  figcaption {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  svg text {
+    font-family: "IBM Plex Mono", monospace;
+    fill: var(--ink);
+  }
+  .lbl-soft { fill: var(--ink-soft); }
+  .part-label {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+  }
+  .ink-line { stroke: var(--ink); }
+  .ink-fill { fill: var(--ink); }
+  .soft-line { stroke: var(--ink-soft); }
+  .paper-fill { fill: var(--paper); }
+  .rail-fill { fill: var(--rail-metal); }
+  .accel-fill { fill: var(--accel); }
+  .cruise-fill { fill: var(--cruise); }
+  .switch-fill { fill: var(--switch); }
+  .switch-line { stroke: var(--switch); }
+  .cruise-line { stroke: var(--cruise); }
+  .dim-line { stroke: var(--ink-soft); stroke-width: 1.2; }
+  .dim-text { fill: var(--ink); font-size: 13px; }
+  .dim-text-strong { fill: var(--cruise); font-size: 13px; font-weight: 600; }
+
+  .plan-flex {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .plan-flex .main { flex: 1 1 640px; min-width: 0; }
+  .plan-flex .inset { flex: 0 0 200px; max-width: 220px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 26px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid var(--line-faint);
+  }
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 13px; height: 13px; border-radius: 2px; flex: none; border: 1px solid var(--ink); }
+
+  footer.titleblock {
+    border-top: 2px solid var(--ink);
+    padding-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 18px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+  }
+  footer.titleblock div span {
+    display: block;
+    color: var(--ink);
+    font-size: 0.86rem;
+    margin-top: 2px;
+  }
+  footer.titleblock .wide { grid-column: span 2; }
+
+  @media (max-width: 620px) {
+    footer.titleblock { grid-template-columns: repeat(2, 1fr); }
+    .plan-flex .inset { flex-basis: 100%; max-width: 320px; margin: 0 auto; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="sheet">
+
+  <header class="title">
+    <h1>Sprayer Carriage Test Rig — Rail Layout</h1>
+    <div class="meta">DWG&nbsp;01&nbsp;·&nbsp;REV&nbsp;A&nbsp;·&nbsp;SCHEMATIC, NOT TO SCALE</div>
+  </header>
+
+  <!-- ============================= FIGURE 1 — PLAN VIEW ============================= -->
+  <section class="card">
+    <h2>Figure 1 — Mechanical Plan View</h2>
+    <p class="sub">Top-down layout of the 8&nbsp;ft rail. The carriage accelerates through the first 12&nbsp;in, holds constant speed across the 6&nbsp;ft measured zone, then decelerates through the last 12&nbsp;in before the limit switch confirms end of travel.</p>
+
+    <div class="plan-flex">
+      <div class="main">
+        <figure>
+          <svg viewBox="0 0 1000 290" role="img" aria-label="Top-down plan view of the rail: home limit switch and drive motor at left, a belt-driven carriage traveling through a 12 inch acceleration zone, a 72 inch cruise zone, and a 12 inch deceleration zone, ending at the far limit switch and idler pulley on the right, with a dimension chain below showing 12, 72, 12, and an overall 96 inch total.">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="soft-line" style="fill:var(--ink-soft)"></path>
+              </marker>
+            </defs>
+
+            <!-- rail segments (color = zone) -->
+            <rect x="60" y="132" width="110" height="16" class="accel-fill ink-line" stroke-width="1.4"></rect>
+            <rect x="170" y="132" width="660" height="16" class="cruise-fill ink-line" stroke-width="1.4"></rect>
+            <rect x="830" y="132" width="110" height="16" class="accel-fill ink-line" stroke-width="1.4"></rect>
+
+            <!-- motor block + drive pulley -->
+            <rect x="8" y="108" width="48" height="64" rx="2" class="paper-fill ink-line" stroke-width="1.6"></rect>
+            <text x="32" y="136" text-anchor="middle" font-size="10" class="lbl-soft">GEAR-</text>
+            <text x="32" y="148" text-anchor="middle" font-size="10" class="lbl-soft">MOTOR</text>
+            <circle cx="62" cy="140" r="15" class="paper-fill ink-line" stroke-width="2"></circle>
+            <circle cx="62" cy="140" r="5" class="rail-fill ink-line" stroke-width="1"></circle>
+
+            <!-- idler pulley + bracket -->
+            <rect x="928" y="118" width="20" height="44" rx="2" class="paper-fill ink-line" stroke-width="1.6"></rect>
+            <circle cx="940" cy="140" r="11" class="paper-fill ink-line" stroke-width="2"></circle>
+
+            <!-- belt strands -->
+            <line x1="78" y1="126" x2="928" y2="126" class="soft-line" stroke-width="2" stroke-dasharray="5 4"></line>
+            <line x1="78" y1="154" x2="928" y2="154" class="soft-line" stroke-width="2" stroke-dasharray="5 4"></line>
+
+            <!-- carriage (shown mid-travel in the cruise zone) -->
+            <rect x="455" y="115" width="66" height="50" rx="2" class="paper-fill ink-line" stroke-width="2"></rect>
+            <circle cx="465" cy="132" r="4.5" class="rail-fill ink-line" stroke-width="1"></circle>
+            <circle cx="465" cy="148" r="4.5" class="rail-fill ink-line" stroke-width="1"></circle>
+            <circle cx="511" cy="132" r="4.5" class="rail-fill ink-line" stroke-width="1"></circle>
+            <circle cx="511" cy="148" r="4.5" class="rail-fill ink-line" stroke-width="1"></circle>
+            <line x1="488" y1="165" x2="488" y2="178" class="ink-line" stroke-width="1.6"></line>
+            <polygon points="481,178 495,178 488,189" class="paper-fill ink-line" stroke-width="1.6"></polygon>
+            <text x="488" y="204" text-anchor="middle" font-size="9" class="lbl-soft">sprayer head</text>
+
+            <!-- limit switch markers -->
+            <line x1="65" y1="108" x2="65" y2="82" class="switch-line" stroke-width="2"></line>
+            <circle cx="65" cy="78" r="5" class="switch-fill switch-line" stroke-width="1.4"></circle>
+            <line x1="935" y1="118" x2="935" y2="82" class="switch-line" stroke-width="2"></line>
+            <circle cx="935" cy="78" r="5" class="switch-fill switch-line" stroke-width="1.4"></circle>
+
+            <!-- component labels -->
+            <text x="32" y="94" text-anchor="middle" font-size="11" class="part-label">HOME</text>
+            <text x="32" y="106" text-anchor="middle" font-size="9" class="lbl-soft">LIMIT SWITCH</text>
+            <text x="965" y="88" text-anchor="start" font-size="11" class="part-label">FAR</text>
+            <text x="965" y="100" text-anchor="start" font-size="9" class="lbl-soft">LIMIT SWITCH</text>
+            <text x="978" y="145" text-anchor="start" font-size="9" class="lbl-soft">IDLER</text>
+            <text x="978" y="156" text-anchor="start" font-size="9" class="lbl-soft">PULLEY</text>
+            <text x="488" y="100" text-anchor="middle" font-size="10" class="part-label">CARRIAGE</text>
+            <text x="488" y="112" text-anchor="middle" font-size="9" class="lbl-soft">(belt-clamped plate)</text>
+
+            <!-- dimension chain -->
+            <g>
+              <line x1="60" y1="150" x2="60" y2="242" class="dim-line"></line>
+              <line x1="170" y1="150" x2="170" y2="242" class="dim-line"></line>
+              <line x1="830" y1="150" x2="830" y2="242" class="dim-line"></line>
+              <line x1="940" y1="150" x2="940" y2="242" class="dim-line"></line>
+
+              <line x1="60" y1="232" x2="170" y2="232" class="dim-line" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+              <text x="115" y="228" text-anchor="middle" class="dim-text">12 in — ACCEL</text>
+
+              <line x1="170" y1="232" x2="830" y2="232" class="dim-line" style="stroke:var(--cruise)" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+              <text x="500" y="228" text-anchor="middle" class="dim-text-strong">72 in (6 ft) — MEASURED / CRUISE ZONE</text>
+
+              <line x1="830" y1="232" x2="940" y2="232" class="dim-line" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+              <text x="885" y="228" text-anchor="middle" class="dim-text">12 in — DECEL</text>
+
+              <line x1="60" y1="266" x2="940" y2="266" class="dim-line" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+              <text x="500" y="262" text-anchor="middle" class="dim-text">96 in (8 ft) — TOTAL RAIL LENGTH</text>
+            </g>
+          </svg>
+          <figcaption>Plan view — V-slot rail, belt-driven carriage, drive/idler pulleys, and the accel / cruise / decel dimension chain.</figcaption>
+        </figure>
+      </div>
+
+      <div class="inset">
+        <figure>
+          <svg viewBox="0 0 220 190" role="img" aria-label="End-on cross-section of the V-slot rail showing the carriage wheels seated in the V-groove.">
+            <rect x="60" y="70" width="100" height="70" class="rail-fill ink-line" stroke-width="1.6"></rect>
+            <polygon points="90,70 130,70 110,100" class="paper-fill ink-line" stroke-width="1.4"></polygon>
+            <circle cx="80" cy="95" r="16" class="paper-fill ink-line" stroke-width="1.8"></circle>
+            <circle cx="80" cy="95" r="4" class="rail-fill ink-line" stroke-width="1"></circle>
+            <circle cx="140" cy="95" r="16" class="paper-fill ink-line" stroke-width="1.8"></circle>
+            <circle cx="140" cy="95" r="4" class="rail-fill ink-line" stroke-width="1"></circle>
+            <rect x="55" y="40" width="110" height="18" rx="2" class="paper-fill ink-line" stroke-width="1.6"></rect>
+            <text x="110" y="30" text-anchor="middle" font-size="10" class="lbl-soft">GANTRY PLATE</text>
+            <text x="110" y="160" text-anchor="middle" font-size="10" class="lbl-soft">V-SLOT 20×40</text>
+            <text x="110" y="172" text-anchor="middle" font-size="9" class="lbl-soft">4× POM WHEEL</text>
+          </svg>
+          <figcaption>End-section detail (schematic)</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="item"><span class="swatch" style="background:var(--accel)"></span>Accel / decel buffer (12 in each)</div>
+      <div class="item"><span class="swatch" style="background:var(--cruise)"></span>Measured cruise zone (72 in / 6 ft)</div>
+      <div class="item"><span class="swatch" style="background:var(--switch)"></span>Limit switch (NC, fail-safe)</div>
+    </div>
+  </section>
+
+  <!-- ============================= FIGURE 2 — BLOCK DIAGRAM ============================= -->
+  <section class="card">
+    <h2>Figure 2 — Control System Block Diagram</h2>
+    <p class="sub">Two independent power paths: the 12&nbsp;V motor rail (top, interruptible by the E-stop in hardware) and the Arduino's own logic supply (dashed, bottom) — so the controller stays alive and reporting status even when the E-stop has cut motor power.</p>
+
+    <figure>
+      <svg viewBox="0 0 1000 430" role="img" aria-label="Block diagram. Top power lane: AC mains feeds a Mean Well 12 volt power supply, through a hardware E-stop, through a 10 amp fuse, into the Cytron motor driver, which drives the motor and encoder. Bottom signal lane: an Arduino Uno, powered independently by USB or a separate 5 volt adapter, sends PWM and direction signals to the motor driver, reads the encoder A and B channels, reads the home and far limit switches, reads the mode and start buttons, and drives the mode indicator LEDs.">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-soft)"></path>
+          </marker>
+        </defs>
+
+        <!-- power lane -->
+        <text x="10" y="22" font-size="10" letter-spacing="1.5" class="lbl-soft">POWER LANE — 12V MOTOR RAIL</text>
+
+        <rect x="10" y="34" width="110" height="56" rx="3" class="paper-fill ink-line" stroke-width="1.6"></rect>
+        <text x="65" y="58" text-anchor="middle" font-size="11" class="part-label">AC MAINS</text>
+        <text x="65" y="72" text-anchor="middle" font-size="9" class="lbl-soft">wall power</text>
+
+        <rect x="168" y="26" width="140" height="72" rx="3" class="paper-fill ink-line" stroke-width="1.6"></rect>
+        <text x="238" y="54" text-anchor="middle" font-size="11" class="part-label">MEAN WELL PSU</text>
+        <text x="238" y="68" text-anchor="middle" font-size="9" class="lbl-soft">LRS-150-12</text>
+        <text x="238" y="80" text-anchor="middle" font-size="9" class="lbl-soft">12V / 12.5A</text>
+
+        <rect x="356" y="26" width="130" height="72" rx="3" class="paper-fill" style="stroke:var(--switch)" stroke-width="2"></rect>
+        <text x="421" y="54" text-anchor="middle" font-size="11" class="part-label" style="fill:var(--switch)">E-STOP</text>
+        <text x="421" y="68" text-anchor="middle" font-size="9" class="lbl-soft">hardware cutoff,</text>
+        <text x="421" y="80" text-anchor="middle" font-size="9" class="lbl-soft">not software</text>
+
+        <rect x="534" y="34" width="100" height="56" rx="3" class="paper-fill ink-line" stroke-width="1.6"></rect>
+        <text x="584" y="58" text-anchor="middle" font-size="11" class="part-label">FUSE</text>
+        <text x="584" y="72" text-anchor="middle" font-size="9" class="lbl-soft">10A inline</text>
+
+        <rect x="682" y="26" width="140" height="72" rx="3" class="paper-fill ink-line" stroke-width="1.6"></rect>
+        <text x="752" y="52" text-anchor="middle" font-size="11" class="part-label">CYTRON MD13S</text>
+        <text x="752" y="66" text-anchor="middle" font-size="9" class="lbl-soft">motor driver</text>
+        <text x="752" y="78" text-anchor="middle" font-size="9" class="lbl-soft">13A cont / 30A pk</text>
+
+        <rect x="870" y="26" width="120" height="72" rx="3" class="paper-fill" style="stroke:var(--cruise)" stroke-width="2"></rect>
+        <text x="930" y="52" text-anchor="middle" font-size="11" class="part-label" style="fill:var(--cruise)">MOTOR</text>
+        <text x="930" y="66" text-anchor="middle" font-size="9" class="lbl-soft">+ encoder</text>
+        <text x="930" y="78" text-anchor="middle" font-size="9" class="lbl-soft">19:1, 64 CPR</text>
+
+        <line x1="120" y1="62" x2="166" y2="62" class="dim-line" marker-end="url(#arrow2)"></line>
+        <line x1="308" y1="62" x2="354" y2="62" class="dim-line" marker-end="url(#arrow2)"></line>
+        <text x="331" y="55" text-anchor="middle" font-size="8" class="lbl-soft">12V</text>
+        <line x1="486" y1="62" x2="532" y2="62" class="dim-line" marker-end="url(#arrow2)"></line>
+        <text x="509" y="55" text-anchor="middle" font-size="8" class="lbl-soft">12V sw.</text>
+        <line x1="634" y1="62" x2="680" y2="62" class="dim-line" marker-end="url(#arrow2)"></line>
+        <line x1="822" y1="62" x2="868" y2="62" class="dim-line" marker-end="url(#arrow2)"></line>
+        <text x="845" y="55" text-anchor="middle" font-size="8" class="lbl-soft">M1A/B</text>
+
+        <!-- independent logic power -->
+        <rect x="356" y="126" width="220" height="42" rx="3" class="paper-fill soft-line" stroke-width="1.4" stroke-dasharray="4 3"></rect>
+        <text x="466" y="151" text-anchor="middle" font-size="10" class="lbl-soft">USB / 5V ADAPTER — independent of 12V rail</text>
+        <line x1="466" y1="168" x2="466" y2="196" class="dim-line" stroke-dasharray="3 3" marker-end="url(#arrow2)"></line>
+
+        <text x="10" y="200" font-size="10" letter-spacing="1.5" class="lbl-soft">SIGNAL LANE — ARDUINO UNO</text>
+
+        <!-- arduino hub -->
+        <rect x="366" y="206" width="200" height="70" rx="3" class="paper-fill ink-line" stroke-width="2.2"></rect>
+        <text x="466" y="236" text-anchor="middle" font-size="12" class="part-label">ARDUINO UNO</text>
+        <text x="466" y="250" text-anchor="middle" font-size="9" class="lbl-soft">state machine + PI speed loop</text>
+        <text x="466" y="262" text-anchor="middle" font-size="9" class="lbl-soft">115200 baud telemetry</text>
+
+        <!-- arduino -> driver -->
+        <path d="M566,224 L 752,224 L 752,100" fill="none" class="dim-line" marker-end="url(#arrow2)"></path>
+        <text x="700" y="216" text-anchor="middle" font-size="8" class="lbl-soft">PWM D9 / DIR D8</text>
+
+        <!-- encoder -> arduino -->
+        <path d="M930,100 L 930,190 L 566,190 L 566,240" fill="none" class="dim-line" marker-end="url(#arrow2)"></path>
+        <text x="800" y="183" text-anchor="middle" font-size="8" class="lbl-soft">ENCODER A / B — D2, D4</text>
+
+        <!-- limit switches -->
+        <rect x="112" y="196" width="150" height="42" rx="3" class="paper-fill" style="stroke:var(--switch)" stroke-width="1.8"></rect>
+        <text x="187" y="221" text-anchor="middle" font-size="10" class="part-label" style="fill:var(--switch)">HOME LIMIT SW — D6</text>
+        <rect x="112" y="246" width="150" height="42" rx="3" class="paper-fill" style="stroke:var(--switch)" stroke-width="1.8"></rect>
+        <text x="187" y="271" text-anchor="middle" font-size="10" class="part-label" style="fill:var(--switch)">FAR LIMIT SW — D7</text>
+        <line x1="262" y1="217" x2="364" y2="230" class="dim-line" marker-end="url(#arrow2)"></line>
+        <line x1="262" y1="267" x2="364" y2="252" class="dim-line" marker-end="url(#arrow2)"></line>
+
+        <!-- buttons -->
+        <rect x="366" y="316" width="94" height="42" rx="3" class="paper-fill ink-line" stroke-width="1.4"></rect>
+        <text x="413" y="341" text-anchor="middle" font-size="9" class="lbl-soft">MODE — D11</text>
+        <rect x="472" y="316" width="94" height="42" rx="3" class="paper-fill ink-line" stroke-width="1.4"></rect>
+        <text x="519" y="341" text-anchor="middle" font-size="9" class="lbl-soft">START — D12</text>
+        <line x1="413" y1="316" x2="440" y2="276" class="dim-line" marker-end="url(#arrow2)"></line>
+        <line x1="519" y1="316" x2="492" y2="276" class="dim-line" marker-end="url(#arrow2)"></line>
+
+        <!-- LEDs -->
+        <rect x="600" y="316" width="150" height="42" rx="3" class="paper-fill ink-line" stroke-width="1.4"></rect>
+        <text x="675" y="341" text-anchor="middle" font-size="9" class="lbl-soft">MODE LEDs — A0/A1/A2</text>
+        <path d="M566,250 L 675,250 L 675,314" fill="none" class="dim-line" marker-end="url(#arrow2)"></path>
+      </svg>
+      <figcaption>Control system block diagram — power lane (top) and signal lane (bottom), meeting only at the driver and encoder.</figcaption>
+    </figure>
+
+    <div class="legend">
+      <div class="item"><span class="swatch" style="background:var(--paper);border-color:var(--switch)"></span>E-stop / limit switches — fail-safe chain</div>
+      <div class="item"><span class="swatch" style="background:var(--paper);border-color:var(--cruise)"></span>Motor + encoder — driven payload</div>
+      <div class="item">‑ ‑ ‑ dashed = Arduino's independent logic supply</div>
+    </div>
+  </section>
+
+  <footer class="titleblock">
+    <div>PROJECT<span>Sprayer Carriage Test Rig</span></div>
+    <div>TRAVEL<span>72 in measured / 96 in rail</span></div>
+    <div>SPEED RANGE<span>0.5 – 3.0 mph, ±10%</span></div>
+    <div>CONTROLLER<span>Arduino Uno + Cytron MD13S</span></div>
+    <div class="wide">DRIVE<span>Pololu 19:1 gearmotor, 500 RPM @ 12V, 80T GT2 pulley</span></div>
+    <div class="wide">REFERENCE<span>See docs/01–09 for full design reasoning and specs</span></div>
+  </footer>
+
+</div>
